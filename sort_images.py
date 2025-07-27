@@ -49,6 +49,30 @@ def move_custom(src, dst, dry_run=False):
 	else:
 		shutil.move(src, dst)
 
+def get_images(input_images_path, images_limit=10000):
+	max_processed_images = 0
+
+	# Recursively walk through all subdirectories and store the path + name of the jpg images
+	images = []
+	for root, dirs, files in os.walk(input_images_path):
+		
+		if "@eaDir" in root:
+			logger.warning(f"Skipping file {f} in {root} because it is an @eaDir file.")
+			continue
+
+		for f in files:
+			# I'm only interested in pictures
+			if f.endswith(".jpg"):
+				tmp = os.path.join(root, f)
+				images.append(tmp)
+				logger.debug(tmp)
+				max_processed_images += 1
+
+				if max_processed_images > images_limit:
+					logger.warning(f"Maximum number of images to process reached: {max_processed_images}.")
+					return images
+	return images
+
 
 def main(input_images_path, output_images_path="./tmp", dry_run=False):
 	'''
@@ -59,27 +83,17 @@ def main(input_images_path, output_images_path="./tmp", dry_run=False):
 	:param input_images_path: Path where images to be organized are located.
 	'''
 
+	fail_count = 0
+	success_count = 0
+	processed_images = 0
+
 	# Path for sorted files to be stored
 	# If it doesn't exist, creates a new one
 	if not os.path.exists(output_images_path):
 		os.mkdir(output_images_path)
 
 
-	fail_count = 0
-	success_count = 0
-	max_processed_images = 0
-	processed_images = 0
-
-	# Recursively walk through all subdirectories and store the path + name of the jpg images
-	images = []
-	for root, dirs, files in os.walk(input_images_path):
-		for f in files:
-			# I'm only interested in pictures
-			if f.endswith(".jpg"):
-				tmp = os.path.join(root, f)
-				images.append(tmp)
-				logger.debug(tmp)
-				max_processed_images += 1
+	images = get_images(input_images_path)
 
 	# Extracts the date an image was taken and moves it to a folder with the format YYYY.MM.DD
 	# If the image doesn't have EXIF tags, sends it to a folder named 0000
@@ -104,7 +118,7 @@ def main(input_images_path, output_images_path="./tmp", dry_run=False):
 		mkdir_custom(os.path.join(output_images_path, date_path), dry_run)
 		move_custom(img, destination, dry_run)
 
-		logger.info(f"Processed {processed_images}/{max_processed_images} images. ({img} -> {destination})")
+		logger.info(f"Processed {processed_images}/{len(images)} images. ({img} -> {destination})")
 
 
 	print("="*120 + "\n\n")
