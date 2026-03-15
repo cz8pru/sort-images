@@ -1,0 +1,12 @@
+[Unit]
+Description=Sort Images Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=paja
+ExecStart=/usr/bin/nice -n 19 /usr/bin/python3 /home/paja/git/sort-images/sort_images.py --eadir-remove /home/paja/0_NAS_photo/backaup_pavel_telefon/ /home/paja/0_NAS_photo/
+ExecStart=/usr/bin/nice -n 19 /usr/bin/python3 /home/paja/git/sort-images/sort_images.py --eadir-remove /home/paja/0_NAS_photo/backup_alca_telefon/ /home/paja/0_NAS_photo/
+
+[Install]
+WantedBy=multi-user.target
