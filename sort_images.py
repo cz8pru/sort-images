@@ -139,10 +139,8 @@ def main(input_images_path, output_images_path="./tmp", dry_run=False, eadir_rem
           if match:
             date_path = os.path.join(match.group(1), match.group(2), match.group(3))
             logger.debug(f"File {img} date extracted from filename: {date_path}")
-            success_count += 1
           else:
             logger.warning(f"File {img} does not match date pattern in filename.")
-            fail_count += 1
 
 
 
@@ -154,11 +152,15 @@ def main(input_images_path, output_images_path="./tmp", dry_run=False, eadir_rem
     dest_image = os.path.basename(img)
 
     destination = os.path.join(output_images_path, date_path, dest_image)
-    
-    mkdir_custom(os.path.join(output_images_path, date_path), dry_run)
-    move_custom(img, destination, dry_run)
 
-    logger.info(f"Processed {processed_images}/{len(images)} images. ({img} -> {destination})")
+    try:
+      mkdir_custom(os.path.join(output_images_path, date_path), dry_run)
+      move_custom(img, destination, dry_run)
+      success_count += 1
+      logger.info(f"Processed {processed_images}/{len(images)} images. ({img} -> {destination})")
+    except Exception as exc:
+      fail_count += 1
+      logger.error(f"Failed to process {img}: {exc}")
 
 
   print("="*120 + "\n\n")

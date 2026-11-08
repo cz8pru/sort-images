@@ -10,3 +10,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable sort-images.service
 
 sudo systemctl start sort-images.service
+
+sudo systemctl status sort-images.service
+
+The service requires the `/mnt/photo` mount and waits for it before starting.
+It then waits 10 seconds before sorting, to allow the NAS to settle.
